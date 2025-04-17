@@ -823,13 +823,1383 @@ function SocialLinksPanel() {
 }
 
 function StreamChannelsPanel() {
-  return <h2 className="text-2xl font-bold">Stream Channels</h2>;
+  const [streamChannels, setStreamChannels] = useState<Array<{
+    id?: number;
+    name: string;
+    type: 'primary' | 'secondary';
+    description: string;
+    platform: string;
+    url: string;
+    color: string;
+    order: number;
+  }>>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [editingChannel, setEditingChannel] = useState<number | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const { toast } = useToast();
+  
+  const [newChannel, setNewChannel] = useState({
+    name: "",
+    type: "primary" as 'primary' | 'secondary',
+    description: "",
+    platform: "",
+    url: "",
+    color: "#9146FF",
+    order: 0
+  });
+  
+  useEffect(() => {
+    async function loadStreamChannels() {
+      try {
+        setIsLoading(true);
+        const res = await apiRequest("GET", "/api/admin/stream-channels");
+        if (res.ok) {
+          const data = await res.json();
+          setStreamChannels(data);
+        }
+      } catch (error) {
+        toast({
+          title: "Error loading stream channels",
+          description: "Failed to load stream channels",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    
+    loadStreamChannels();
+  }, [toast]);
+  
+  async function handleSaveStreamChannel(channel: typeof newChannel, id?: number) {
+    try {
+      setIsSaving(true);
+      
+      let res;
+      if (id) {
+        // Update existing channel
+        res = await apiRequest("PUT", `/api/admin/stream-channels/${id}`, channel);
+      } else {
+        // Create new channel
+        res = await apiRequest("POST", "/api/admin/stream-channels", channel);
+      }
+      
+      if (res.ok) {
+        const updatedChannel = await res.json();
+        
+        if (id) {
+          // Update in the list
+          setStreamChannels(channels => 
+            channels.map(c => c.id === id ? updatedChannel : c)
+          );
+          setEditingChannel(null);
+        } else {
+          // Add to the list
+          setStreamChannels(channels => [...channels, updatedChannel]);
+          setShowAddForm(false);
+          setNewChannel({
+            name: "",
+            type: "primary",
+            description: "",
+            platform: "",
+            url: "",
+            color: "#9146FF",
+            order: streamChannels.length + 1
+          });
+        }
+        
+        toast({
+          title: id ? "Channel updated" : "Channel added",
+          description: id ? "Stream channel updated successfully." : "New stream channel added successfully."
+        });
+      } else {
+        toast({
+          title: "Error saving channel",
+          description: "There was an error saving the stream channel.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error saving channel",
+        description: "There was an error saving the stream channel.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  }
+  
+  async function handleDeleteStreamChannel(id: number) {
+    if (!confirm("Are you sure you want to delete this stream channel?")) {
+      return;
+    }
+    
+    try {
+      const res = await apiRequest("DELETE", `/api/admin/stream-channels/${id}`);
+      
+      if (res.ok) {
+        setStreamChannels(channels => channels.filter(c => c.id !== id));
+        toast({
+          title: "Channel deleted",
+          description: "Stream channel deleted successfully."
+        });
+      } else {
+        toast({
+          title: "Error deleting channel",
+          description: "There was an error deleting the stream channel.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error deleting channel",
+        description: "There was an error deleting the stream channel.",
+        variant: "destructive"
+      });
+    }
+  }
+  
+  function handleChangeNewChannel(key: string, value: string | number) {
+    setNewChannel({
+      ...newChannel,
+      [key]: value
+    });
+  }
+  
+  function handleEditChannel(id: number) {
+    const channelToEdit = streamChannels.find(c => c.id === id);
+    if (channelToEdit) {
+      setEditingChannel(id);
+    }
+  }
+  
+  function handleUpdateEditingChannel(key: string, value: string | number) {
+    setStreamChannels(channels => 
+      channels.map(c => 
+        c.id === editingChannel 
+          ? { ...c, [key]: value } 
+          : c
+      )
+    );
+  }
+  
+  if (isLoading) {
+    return <div className="flex justify-center items-center h-64">Loading stream channels...</div>;
+  }
+  
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Stream Channels</h2>
+        <Button 
+          onClick={() => setShowAddForm(!showAddForm)}
+          className="bg-orange-500 hover:bg-orange-600"
+        >
+          {showAddForm ? "Cancel" : "Add New Channel"}
+        </Button>
+      </div>
+      
+      {showAddForm && (
+        <Card className="p-4 border-orange-500">
+          <h3 className="text-lg font-semibold mb-4">Add New Stream Channel</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Channel Name</Label>
+              <Input
+                id="name"
+                value={newChannel.name}
+                onChange={(e) => handleChangeNewChannel("name", e.target.value)}
+                placeholder="Main Stream"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="type">Channel Type</Label>
+              <select 
+                id="type"
+                className="w-full px-3 py-2 border rounded-md"
+                value={newChannel.type}
+                onChange={(e) => handleChangeNewChannel("type", e.target.value)}
+              >
+                <option value="primary">Primary</option>
+                <option value="secondary">Secondary</option>
+              </select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="platform">Platform</Label>
+              <Input
+                id="platform"
+                value={newChannel.platform}
+                onChange={(e) => handleChangeNewChannel("platform", e.target.value)}
+                placeholder="Twitch"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="url">URL</Label>
+              <Input
+                id="url"
+                value={newChannel.url}
+                onChange={(e) => handleChangeNewChannel("url", e.target.value)}
+                placeholder="https://twitch.tv/channelname"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="color">Color</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="color"
+                  type="color"
+                  value={newChannel.color}
+                  onChange={(e) => handleChangeNewChannel("color", e.target.value)}
+                  className="w-16 h-10"
+                />
+                <Input
+                  type="text"
+                  value={newChannel.color}
+                  onChange={(e) => handleChangeNewChannel("color", e.target.value)}
+                  className="flex-1"
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="order">Display Order</Label>
+              <Input
+                id="order"
+                type="number"
+                value={newChannel.order}
+                onChange={(e) => handleChangeNewChannel("order", parseInt(e.target.value))}
+              />
+            </div>
+            
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="description">Description</Label>
+              <Input
+                id="description"
+                value={newChannel.description}
+                onChange={(e) => handleChangeNewChannel("description", e.target.value)}
+                placeholder="Main IRL streaming channel"
+              />
+            </div>
+          </div>
+          
+          <div className="mt-4 flex justify-end">
+            <Button 
+              onClick={() => handleSaveStreamChannel(newChannel)}
+              disabled={isSaving}
+              className="bg-orange-500 hover:bg-orange-600"
+            >
+              {isSaving ? "Saving..." : "Add Channel"}
+            </Button>
+          </div>
+        </Card>
+      )}
+      
+      <div className="space-y-4">
+        {streamChannels.length === 0 ? (
+          <p className="text-center py-8 text-gray-500">No stream channels added yet.</p>
+        ) : (
+          streamChannels.sort((a, b) => a.order - b.order).map(channel => (
+            <Card key={channel.id} className="p-4">
+              {editingChannel === channel.id ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor={`edit-name-${channel.id}`}>Channel Name</Label>
+                    <Input
+                      id={`edit-name-${channel.id}`}
+                      value={channel.name}
+                      onChange={(e) => handleUpdateEditingChannel("name", e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor={`edit-type-${channel.id}`}>Channel Type</Label>
+                    <select 
+                      id={`edit-type-${channel.id}`}
+                      className="w-full px-3 py-2 border rounded-md"
+                      value={channel.type}
+                      onChange={(e) => handleUpdateEditingChannel("type", e.target.value)}
+                    >
+                      <option value="primary">Primary</option>
+                      <option value="secondary">Secondary</option>
+                    </select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor={`edit-platform-${channel.id}`}>Platform</Label>
+                    <Input
+                      id={`edit-platform-${channel.id}`}
+                      value={channel.platform}
+                      onChange={(e) => handleUpdateEditingChannel("platform", e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor={`edit-url-${channel.id}`}>URL</Label>
+                    <Input
+                      id={`edit-url-${channel.id}`}
+                      value={channel.url}
+                      onChange={(e) => handleUpdateEditingChannel("url", e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor={`edit-color-${channel.id}`}>Color</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id={`edit-color-${channel.id}`}
+                        type="color"
+                        value={channel.color}
+                        onChange={(e) => handleUpdateEditingChannel("color", e.target.value)}
+                        className="w-16 h-10"
+                      />
+                      <Input
+                        type="text"
+                        value={channel.color}
+                        onChange={(e) => handleUpdateEditingChannel("color", e.target.value)}
+                        className="flex-1"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor={`edit-order-${channel.id}`}>Display Order</Label>
+                    <Input
+                      id={`edit-order-${channel.id}`}
+                      type="number"
+                      value={channel.order}
+                      onChange={(e) => handleUpdateEditingChannel("order", parseInt(e.target.value))}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor={`edit-description-${channel.id}`}>Description</Label>
+                    <Input
+                      id={`edit-description-${channel.id}`}
+                      value={channel.description}
+                      onChange={(e) => handleUpdateEditingChannel("description", e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="md:col-span-2 flex justify-end gap-2">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setEditingChannel(null)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      onClick={() => handleSaveStreamChannel(channel, channel.id)}
+                      disabled={isSaving}
+                      className="bg-orange-500 hover:bg-orange-600"
+                    >
+                      {isSaving ? "Saving..." : "Save Changes"}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col md:flex-row md:items-center justify-between">
+                  <div className="flex gap-4 items-center">
+                    <div 
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-white"
+                      style={{ backgroundColor: channel.color }}
+                    >
+                      {channel.platform.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold">{channel.name}</h3>
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${
+                          channel.type === 'primary' 
+                            ? 'bg-orange-100 text-orange-800' 
+                            : 'bg-blue-100 text-blue-800'
+                        }`}>
+                          {channel.type === 'primary' ? 'Primary' : 'Secondary'}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-500">{channel.url}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 mt-4 md:mt-0">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="border-orange-500 text-orange-500"
+                      onClick={() => handleEditChannel(channel.id as number)}
+                    >
+                      Edit
+                    </Button>
+                    <Button 
+                      variant="destructive" 
+                      size="sm"
+                      onClick={() => handleDeleteStreamChannel(channel.id as number)}
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </Card>
+          ))
+        )}
+      </div>
+    </div>
+  );
 }
 
 function AnnouncementsPanel() {
-  return <h2 className="text-2xl font-bold">Announcements</h2>;
+  const [announcements, setAnnouncements] = useState<Array<{
+    id?: number;
+    title: string;
+    content: string;
+    active: boolean;
+    createdAt?: string;
+    expiresAt?: string | null;
+  }>>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [editingAnnouncement, setEditingAnnouncement] = useState<number | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const { toast } = useToast();
+  
+  const [newAnnouncement, setNewAnnouncement] = useState({
+    title: "",
+    content: "",
+    active: true,
+    expiresAt: ""
+  });
+  
+  useEffect(() => {
+    async function loadAnnouncements() {
+      try {
+        setIsLoading(true);
+        const res = await apiRequest("GET", "/api/admin/announcements");
+        if (res.ok) {
+          const data = await res.json();
+          setAnnouncements(data);
+        }
+      } catch (error) {
+        toast({
+          title: "Error loading announcements",
+          description: "Failed to load announcements",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    
+    loadAnnouncements();
+  }, [toast]);
+  
+  async function handleSaveAnnouncement(announcement: any, id?: number) {
+    try {
+      setIsSaving(true);
+      
+      const formattedAnnouncement = {
+        ...announcement,
+        expiresAt: announcement.expiresAt ? new Date(announcement.expiresAt).toISOString() : null
+      };
+      
+      let res;
+      if (id) {
+        // Update existing announcement
+        res = await apiRequest("PUT", `/api/admin/announcements/${id}`, formattedAnnouncement);
+      } else {
+        // Create new announcement
+        res = await apiRequest("POST", "/api/admin/announcements", formattedAnnouncement);
+      }
+      
+      if (res.ok) {
+        const updatedAnnouncement = await res.json();
+        
+        if (id) {
+          // Update in the list
+          setAnnouncements(items => 
+            items.map(a => a.id === id ? updatedAnnouncement : a)
+          );
+          setEditingAnnouncement(null);
+        } else {
+          // Add to the list
+          setAnnouncements(items => [...items, updatedAnnouncement]);
+          setShowAddForm(false);
+          setNewAnnouncement({
+            title: "",
+            content: "",
+            active: true,
+            expiresAt: ""
+          });
+        }
+        
+        toast({
+          title: id ? "Announcement updated" : "Announcement added",
+          description: id ? "Announcement updated successfully." : "New announcement added successfully."
+        });
+      } else {
+        toast({
+          title: "Error saving announcement",
+          description: "There was an error saving the announcement.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error saving announcement",
+        description: "There was an error saving the announcement.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  }
+  
+  async function handleDeleteAnnouncement(id: number) {
+    if (!confirm("Are you sure you want to delete this announcement?")) {
+      return;
+    }
+    
+    try {
+      const res = await apiRequest("DELETE", `/api/admin/announcements/${id}`);
+      
+      if (res.ok) {
+        setAnnouncements(items => items.filter(a => a.id !== id));
+        toast({
+          title: "Announcement deleted",
+          description: "Announcement deleted successfully."
+        });
+      } else {
+        toast({
+          title: "Error deleting announcement",
+          description: "There was an error deleting the announcement.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error deleting announcement",
+        description: "There was an error deleting the announcement.",
+        variant: "destructive"
+      });
+    }
+  }
+  
+  function handleChangeNewAnnouncement(key: string, value: string | boolean) {
+    setNewAnnouncement({
+      ...newAnnouncement,
+      [key]: value
+    });
+  }
+  
+  function handleEditAnnouncement(id: number) {
+    const announcementToEdit = announcements.find(a => a.id === id);
+    if (announcementToEdit) {
+      // Format the dates for the form
+      const formattedAnnouncement = {
+        ...announcementToEdit,
+        expiresAt: announcementToEdit.expiresAt 
+          ? new Date(announcementToEdit.expiresAt).toISOString().slice(0, 16) 
+          : ""
+      };
+      
+      setAnnouncements(items => 
+        items.map(a => a.id === id ? formattedAnnouncement : a)
+      );
+      setEditingAnnouncement(id);
+    }
+  }
+  
+  function handleUpdateEditingAnnouncement(key: string, value: string | boolean) {
+    setAnnouncements(items => 
+      items.map(a => 
+        a.id === editingAnnouncement 
+          ? { ...a, [key]: value } 
+          : a
+      )
+    );
+  }
+  
+  function formatDate(dateString: string | undefined | null) {
+    if (!dateString) return "Never";
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+  
+  if (isLoading) {
+    return <div className="flex justify-center items-center h-64">Loading announcements...</div>;
+  }
+  
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Announcements</h2>
+        <Button 
+          onClick={() => setShowAddForm(!showAddForm)}
+          className="bg-orange-500 hover:bg-orange-600"
+        >
+          {showAddForm ? "Cancel" : "Add New Announcement"}
+        </Button>
+      </div>
+      
+      {showAddForm && (
+        <Card className="p-4 border-orange-500">
+          <h3 className="text-lg font-semibold mb-4">Add New Announcement</h3>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="title">Title</Label>
+              <Input
+                id="title"
+                value={newAnnouncement.title}
+                onChange={(e) => handleChangeNewAnnouncement("title", e.target.value)}
+                placeholder="Announcement Title"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="content">Content</Label>
+              <textarea
+                id="content"
+                className="w-full p-2 border rounded-md min-h-[100px]"
+                value={newAnnouncement.content}
+                onChange={(e) => handleChangeNewAnnouncement("content", e.target.value)}
+                placeholder="Announcement content..."
+              />
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="expiresAt">Expiration Date (Optional)</Label>
+                <Input
+                  id="expiresAt"
+                  type="datetime-local"
+                  value={newAnnouncement.expiresAt}
+                  onChange={(e) => handleChangeNewAnnouncement("expiresAt", e.target.value)}
+                />
+              </div>
+              
+              <div className="flex items-center space-x-2 mt-8">
+                <input
+                  id="active"
+                  type="checkbox"
+                  className="h-4 w-4"
+                  checked={newAnnouncement.active}
+                  onChange={(e) => handleChangeNewAnnouncement("active", e.target.checked)}
+                />
+                <Label htmlFor="active">Active announcement</Label>
+              </div>
+            </div>
+          </div>
+          
+          <div className="mt-4 flex justify-end">
+            <Button 
+              onClick={() => handleSaveAnnouncement(newAnnouncement)}
+              disabled={isSaving}
+              className="bg-orange-500 hover:bg-orange-600"
+            >
+              {isSaving ? "Saving..." : "Add Announcement"}
+            </Button>
+          </div>
+        </Card>
+      )}
+      
+      <div className="space-y-4">
+        {announcements.length === 0 ? (
+          <p className="text-center py-8 text-gray-500">No announcements added yet.</p>
+        ) : (
+          announcements.map(announcement => (
+            <Card key={announcement.id} className="p-4">
+              {editingAnnouncement === announcement.id ? (
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor={`edit-title-${announcement.id}`}>Title</Label>
+                    <Input
+                      id={`edit-title-${announcement.id}`}
+                      value={announcement.title}
+                      onChange={(e) => handleUpdateEditingAnnouncement("title", e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor={`edit-content-${announcement.id}`}>Content</Label>
+                    <textarea
+                      id={`edit-content-${announcement.id}`}
+                      className="w-full p-2 border rounded-md min-h-[100px]"
+                      value={announcement.content}
+                      onChange={(e) => handleUpdateEditingAnnouncement("content", e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor={`edit-expiresAt-${announcement.id}`}>Expiration Date (Optional)</Label>
+                      <Input
+                        id={`edit-expiresAt-${announcement.id}`}
+                        type="datetime-local"
+                        value={announcement.expiresAt || ""}
+                        onChange={(e) => handleUpdateEditingAnnouncement("expiresAt", e.target.value)}
+                      />
+                    </div>
+                    
+                    <div className="flex items-center space-x-2 mt-8">
+                      <input
+                        id={`edit-active-${announcement.id}`}
+                        type="checkbox"
+                        className="h-4 w-4"
+                        checked={announcement.active}
+                        onChange={(e) => handleUpdateEditingAnnouncement("active", e.target.checked)}
+                      />
+                      <Label htmlFor={`edit-active-${announcement.id}`}>Active announcement</Label>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end gap-2">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setEditingAnnouncement(null)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      onClick={() => handleSaveAnnouncement(announcement, announcement.id)}
+                      disabled={isSaving}
+                      className="bg-orange-500 hover:bg-orange-600"
+                    >
+                      {isSaving ? "Saving..." : "Save Changes"}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-semibold">{announcement.title}</h3>
+                        {announcement.active ? (
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-800">
+                            Active
+                          </span>
+                        ) : (
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-800">
+                            Inactive
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Created: {formatDate(announcement.createdAt)}
+                        {announcement.expiresAt && ` • Expires: ${formatDate(announcement.expiresAt)}`}
+                      </p>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="border-orange-500 text-orange-500"
+                        onClick={() => handleEditAnnouncement(announcement.id as number)}
+                      >
+                        Edit
+                      </Button>
+                      <Button 
+                        variant="destructive" 
+                        size="sm"
+                        onClick={() => handleDeleteAnnouncement(announcement.id as number)}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4 p-3 bg-gray-50 rounded-md">
+                    <p className="whitespace-pre-wrap">{announcement.content}</p>
+                  </div>
+                </div>
+              )}
+            </Card>
+          ))
+        )}
+      </div>
+    </div>
+  );
 }
 
 function PageContentPanel() {
-  return <h2 className="text-2xl font-bold">Page Content</h2>;
+  const [pageContents, setPageContents] = useState<Array<{
+    id?: number;
+    section: string;
+    content: any;
+    updatedAt?: string;
+  }>>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [editingContent, setEditingContent] = useState<string | null>(null);
+  const { toast } = useToast();
+  
+  useEffect(() => {
+    async function loadPageContents() {
+      try {
+        setIsLoading(true);
+        const res = await apiRequest("GET", "/api/admin/page-content");
+        if (res.ok) {
+          const data = await res.json();
+          setPageContents(data);
+        }
+      } catch (error) {
+        toast({
+          title: "Error loading page content",
+          description: "Failed to load page content",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    
+    loadPageContents();
+  }, [toast]);
+  
+  async function handleSavePageContent(section: string) {
+    const contentToSave = pageContents.find(c => c.section === section);
+    if (!contentToSave) return;
+    
+    try {
+      setIsSaving(true);
+      
+      const res = await apiRequest("PUT", `/api/admin/page-content/${section}`, {
+        content: contentToSave.content
+      });
+      
+      if (res.ok) {
+        const updatedContent = await res.json();
+        
+        setPageContents(contents => 
+          contents.map(c => c.section === section ? updatedContent : c)
+        );
+        setEditingContent(null);
+        
+        toast({
+          title: "Content updated",
+          description: `${section} content updated successfully.`
+        });
+      } else {
+        toast({
+          title: "Error saving content",
+          description: "There was an error saving the page content.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error saving content",
+        description: "There was an error saving the page content.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  }
+  
+  function handleEditContent(section: string) {
+    setEditingContent(section);
+  }
+  
+  function handleUpdateContent(section: string, key: string, value: any) {
+    setPageContents(contents => 
+      contents.map(c => 
+        c.section === section 
+          ? { 
+              ...c, 
+              content: { 
+                ...c.content, 
+                [key]: value 
+              } 
+            } 
+          : c
+      )
+    );
+  }
+  
+  function formatDate(dateString: string | undefined) {
+    if (!dateString) return "";
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+  
+  if (isLoading) {
+    return <div className="flex justify-center items-center h-64">Loading page content...</div>;
+  }
+  
+  // Group content by section for better organization
+  const heroContent = pageContents.find(c => c.section === "hero");
+  const streamContent = pageContents.find(c => c.section === "streams");
+  const connectContent = pageContents.find(c => c.section === "connect");
+  const ctaContent = pageContents.find(c => c.section === "cta");
+  const footerContent = pageContents.find(c => c.section === "footer");
+  
+  return (
+    <div className="space-y-8">
+      <h2 className="text-2xl font-bold">Page Content</h2>
+      <p className="text-gray-500">
+        Edit the content for each section of your website. Changes will be reflected immediately on the live site.
+      </p>
+      
+      {/* Hero Section */}
+      {heroContent && (
+        <Card className="p-4">
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h3 className="text-lg font-semibold">Hero Section</h3>
+              <p className="text-sm text-gray-500">
+                Last updated: {formatDate(heroContent.updatedAt)}
+              </p>
+            </div>
+            {editingContent === "hero" ? (
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setEditingContent(null)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => handleSavePageContent("hero")}
+                  disabled={isSaving}
+                  className="bg-orange-500 hover:bg-orange-600"
+                >
+                  {isSaving ? "Saving..." : "Save Changes"}
+                </Button>
+              </div>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-orange-500 text-orange-500"
+                onClick={() => handleEditContent("hero")}
+              >
+                Edit Content
+              </Button>
+            )}
+          </div>
+          
+          {editingContent === "hero" ? (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="hero-title">Hero Title</Label>
+                <Input
+                  id="hero-title"
+                  value={heroContent.content.title || ""}
+                  onChange={(e) => handleUpdateContent("hero", "title", e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="hero-subtitle">Hero Subtitle</Label>
+                <Input
+                  id="hero-subtitle"
+                  value={heroContent.content.subtitle || ""}
+                  onChange={(e) => handleUpdateContent("hero", "subtitle", e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="hero-cta">Call to Action Text</Label>
+                <Input
+                  id="hero-cta"
+                  value={heroContent.content.ctaText || ""}
+                  onChange={(e) => handleUpdateContent("hero", "ctaText", e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="hero-image">Background Image URL</Label>
+                <Input
+                  id="hero-image"
+                  value={heroContent.content.backgroundImage || ""}
+                  onChange={(e) => handleUpdateContent("hero", "backgroundImage", e.target.value)}
+                  placeholder="/path/to/image.jpg"
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="font-medium">Title:</p>
+                <p className="text-gray-700">{heroContent.content.title || "Not set"}</p>
+              </div>
+              <div>
+                <p className="font-medium">Subtitle:</p>
+                <p className="text-gray-700">{heroContent.content.subtitle || "Not set"}</p>
+              </div>
+              <div>
+                <p className="font-medium">CTA Text:</p>
+                <p className="text-gray-700">{heroContent.content.ctaText || "Not set"}</p>
+              </div>
+              <div>
+                <p className="font-medium">Background Image:</p>
+                <p className="text-gray-700 truncate">{heroContent.content.backgroundImage || "Not set"}</p>
+              </div>
+            </div>
+          )}
+        </Card>
+      )}
+      
+      {/* Streams Section */}
+      {streamContent && (
+        <Card className="p-4">
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h3 className="text-lg font-semibold">Streams Section</h3>
+              <p className="text-sm text-gray-500">
+                Last updated: {formatDate(streamContent.updatedAt)}
+              </p>
+            </div>
+            {editingContent === "streams" ? (
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setEditingContent(null)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => handleSavePageContent("streams")}
+                  disabled={isSaving}
+                  className="bg-orange-500 hover:bg-orange-600"
+                >
+                  {isSaving ? "Saving..." : "Save Changes"}
+                </Button>
+              </div>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-orange-500 text-orange-500"
+                onClick={() => handleEditContent("streams")}
+              >
+                Edit Content
+              </Button>
+            )}
+          </div>
+          
+          {editingContent === "streams" ? (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="streams-title">Section Title</Label>
+                <Input
+                  id="streams-title"
+                  value={streamContent.content.title || ""}
+                  onChange={(e) => handleUpdateContent("streams", "title", e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="streams-description">Section Description</Label>
+                <textarea
+                  id="streams-description"
+                  className="w-full p-2 border rounded-md min-h-[100px]"
+                  value={streamContent.content.description || ""}
+                  onChange={(e) => handleUpdateContent("streams", "description", e.target.value)}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div>
+                <p className="font-medium">Title:</p>
+                <p className="text-gray-700">{streamContent.content.title || "Not set"}</p>
+              </div>
+              <div>
+                <p className="font-medium">Description:</p>
+                <p className="text-gray-700">{streamContent.content.description || "Not set"}</p>
+              </div>
+            </div>
+          )}
+        </Card>
+      )}
+      
+      {/* Connect Section */}
+      {connectContent && (
+        <Card className="p-4">
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h3 className="text-lg font-semibold">Connect Section</h3>
+              <p className="text-sm text-gray-500">
+                Last updated: {formatDate(connectContent.updatedAt)}
+              </p>
+            </div>
+            {editingContent === "connect" ? (
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setEditingContent(null)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => handleSavePageContent("connect")}
+                  disabled={isSaving}
+                  className="bg-orange-500 hover:bg-orange-600"
+                >
+                  {isSaving ? "Saving..." : "Save Changes"}
+                </Button>
+              </div>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-orange-500 text-orange-500"
+                onClick={() => handleEditContent("connect")}
+              >
+                Edit Content
+              </Button>
+            )}
+          </div>
+          
+          {editingContent === "connect" ? (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="connect-title">Section Title</Label>
+                <Input
+                  id="connect-title"
+                  value={connectContent.content.title || ""}
+                  onChange={(e) => handleUpdateContent("connect", "title", e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="connect-description">Section Description</Label>
+                <textarea
+                  id="connect-description"
+                  className="w-full p-2 border rounded-md min-h-[100px]"
+                  value={connectContent.content.description || ""}
+                  onChange={(e) => handleUpdateContent("connect", "description", e.target.value)}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div>
+                <p className="font-medium">Title:</p>
+                <p className="text-gray-700">{connectContent.content.title || "Not set"}</p>
+              </div>
+              <div>
+                <p className="font-medium">Description:</p>
+                <p className="text-gray-700">{connectContent.content.description || "Not set"}</p>
+              </div>
+            </div>
+          )}
+        </Card>
+      )}
+      
+      {/* CTA Section */}
+      {ctaContent && (
+        <Card className="p-4">
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h3 className="text-lg font-semibold">Call to Action Section</h3>
+              <p className="text-sm text-gray-500">
+                Last updated: {formatDate(ctaContent.updatedAt)}
+              </p>
+            </div>
+            {editingContent === "cta" ? (
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setEditingContent(null)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => handleSavePageContent("cta")}
+                  disabled={isSaving}
+                  className="bg-orange-500 hover:bg-orange-600"
+                >
+                  {isSaving ? "Saving..." : "Save Changes"}
+                </Button>
+              </div>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-orange-500 text-orange-500"
+                onClick={() => handleEditContent("cta")}
+              >
+                Edit Content
+              </Button>
+            )}
+          </div>
+          
+          {editingContent === "cta" ? (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="cta-title">Title</Label>
+                <Input
+                  id="cta-title"
+                  value={ctaContent.content.title || ""}
+                  onChange={(e) => handleUpdateContent("cta", "title", e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="cta-description">Description</Label>
+                <textarea
+                  id="cta-description"
+                  className="w-full p-2 border rounded-md min-h-[100px]"
+                  value={ctaContent.content.description || ""}
+                  onChange={(e) => handleUpdateContent("cta", "description", e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="cta-button">Button Text</Label>
+                <Input
+                  id="cta-button"
+                  value={ctaContent.content.buttonText || ""}
+                  onChange={(e) => handleUpdateContent("cta", "buttonText", e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="cta-url">Button URL</Label>
+                <Input
+                  id="cta-url"
+                  value={ctaContent.content.buttonUrl || ""}
+                  onChange={(e) => handleUpdateContent("cta", "buttonUrl", e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="cta-image">Background Image URL</Label>
+                <Input
+                  id="cta-image"
+                  value={ctaContent.content.backgroundImage || ""}
+                  onChange={(e) => handleUpdateContent("cta", "backgroundImage", e.target.value)}
+                  placeholder="/path/to/image.jpg"
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="font-medium">Title:</p>
+                <p className="text-gray-700">{ctaContent.content.title || "Not set"}</p>
+              </div>
+              <div>
+                <p className="font-medium">Button Text:</p>
+                <p className="text-gray-700">{ctaContent.content.buttonText || "Not set"}</p>
+              </div>
+              <div>
+                <p className="font-medium">Button URL:</p>
+                <p className="text-gray-700">{ctaContent.content.buttonUrl || "Not set"}</p>
+              </div>
+              <div>
+                <p className="font-medium">Background Image:</p>
+                <p className="text-gray-700 truncate">{ctaContent.content.backgroundImage || "Not set"}</p>
+              </div>
+              <div className="col-span-2">
+                <p className="font-medium">Description:</p>
+                <p className="text-gray-700">{ctaContent.content.description || "Not set"}</p>
+              </div>
+            </div>
+          )}
+        </Card>
+      )}
+      
+      {/* Footer Section */}
+      {footerContent && (
+        <Card className="p-4">
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h3 className="text-lg font-semibold">Footer Section</h3>
+              <p className="text-sm text-gray-500">
+                Last updated: {formatDate(footerContent.updatedAt)}
+              </p>
+            </div>
+            {editingContent === "footer" ? (
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setEditingContent(null)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => handleSavePageContent("footer")}
+                  disabled={isSaving}
+                  className="bg-orange-500 hover:bg-orange-600"
+                >
+                  {isSaving ? "Saving..." : "Save Changes"}
+                </Button>
+              </div>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-orange-500 text-orange-500"
+                onClick={() => handleEditContent("footer")}
+              >
+                Edit Content
+              </Button>
+            )}
+          </div>
+          
+          {editingContent === "footer" ? (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="footer-copyright">Copyright Text</Label>
+                <Input
+                  id="footer-copyright"
+                  value={footerContent.content.copyright || ""}
+                  onChange={(e) => handleUpdateContent("footer", "copyright", e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="footer-credits">Credits</Label>
+                <Input
+                  id="footer-credits"
+                  value={footerContent.content.credits || ""}
+                  onChange={(e) => handleUpdateContent("footer", "credits", e.target.value)}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div>
+                <p className="font-medium">Copyright:</p>
+                <p className="text-gray-700">{footerContent.content.copyright || "Not set"}</p>
+              </div>
+              <div>
+                <p className="font-medium">Credits:</p>
+                <p className="text-gray-700">{footerContent.content.credits || "Not set"}</p>
+              </div>
+            </div>
+          )}
+        </Card>
+      )}
+    </div>
+  );
 }
