@@ -12,6 +12,14 @@ import { pool } from "./db";
 // For session store
 import pgSimple from 'connect-pg-simple';
 const PostgresStore = pgSimple(session);
+const sessionStore = new PostgresStore({
+  pool: pool,
+  createTableIfMissing: true,
+});
+
+export const storage = {
+  sessionStore,
+  // ... rest of storage methods
 
 export interface IStorage {
   // User management

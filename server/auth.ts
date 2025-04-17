@@ -28,7 +28,7 @@ export function setupAuth(app: Express) {
     secret: process.env.SESSION_SECRET || 'rennsz-landing-page-secret',
     resave: false,
     saveUninitialized: false,
-    store: storage.sessionStore,
+    store: storage.sessionStore || undefined,
     cookie: {
       maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
       secure: process.env.NODE_ENV === 'production',
