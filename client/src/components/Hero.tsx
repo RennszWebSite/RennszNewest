@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { FaTwitch, FaDiscord, FaTwitter, FaInstagram } from 'react-icons/fa';
 import { socialLinks } from '@/lib/socialData';
+import heroImage from '../assets/IMG_2456.png';
 
 const Hero = () => {
   return (
@@ -15,7 +16,7 @@ const Hero = () => {
           <div className="bg-dark rounded-2xl overflow-hidden shadow-xl">
             <div className="relative aspect-video md:aspect-[21/9] overflow-hidden">
               <img 
-                src="https://i.imgur.com/VkY5L6f.png" 
+                src={heroImage} 
                 alt="REMAK - Content Creator" 
                 className="w-full h-full object-cover"
               />

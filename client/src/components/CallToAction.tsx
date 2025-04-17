@@ -1,13 +1,20 @@
 import { motion } from 'framer-motion';
 import { FaTwitch, FaLink } from 'react-icons/fa';
 import { streamChannels } from '@/lib/socialData';
+import secondaryImage from '../assets/IMG_2458.jpeg';
 
 const CallToAction = () => {
   const mainChannel = streamChannels.find(channel => channel.type === 'primary');
 
   return (
-    <section className="py-16 bg-gradient-to-r from-secondary to-dark">
-      <div className="container mx-auto px-4 text-center">
+    <section className="py-16 bg-gradient-to-r from-secondary to-dark relative overflow-hidden">
+      {/* Background image with overlay */}
+      <div className="absolute inset-0 opacity-15 z-0">
+        <img src={secondaryImage} alt="Stream background" className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-b from-dark via-transparent to-dark"></div>
+      </div>
+      
+      <div className="container mx-auto px-4 text-center relative z-10">
         <motion.div 
           className="max-w-3xl mx-auto"
           initial={{ opacity: 0, y: 20 }}
