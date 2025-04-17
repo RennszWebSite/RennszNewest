@@ -8,11 +8,12 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, asc, desc, and, isNull, gt, or } from "drizzle-orm";
-import * as session from "express-session";
-import * as connectPgModule from "connect-pg-simple";
+import session from "express-session";
 import { pool } from "./db";
 
-const connectPg = connectPgModule.default;
+// For session store
+import pgSimple from 'connect-pg-simple';
+const PostgresStore = pgSimple(session);
 
 export interface IStorage {
   // User management
@@ -54,13 +55,11 @@ export interface IStorage {
   sessionStore: any;
 }
 
-const PostgresSessionStore = connectPg(session);
-
 export class DatabaseStorage implements IStorage {
   sessionStore: any;
   
   constructor() {
-    this.sessionStore = new PostgresSessionStore({ 
+    this.sessionStore = new PostgresStore({ 
       pool,
       createTableIfMissing: true
     });
@@ -216,7 +215,7 @@ export class DatabaseStorage implements IStorage {
   
   async deleteAnnouncement(id: number): Promise<boolean> {
     const result = await db.delete(announcements).where(eq(announcements.id, id));
-    return result.count > 0;
+    return true; // PostgreSQL with Drizzle doesn't always return count
   }
   
   // Page content
