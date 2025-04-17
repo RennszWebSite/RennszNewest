@@ -1,0 +1,123 @@
+==> It looks like we don't have access to your repo, but we'll try to clone it anyway.
+==> Cloning from https://github.com/RennszWebSite/RennszNewest
+==> Checking out commit cbb502860953d5607bde3c9fe29a9a3867e2d355 in branch main
+==> Downloading cache...
+==> Transferred 200MB in 7s. Extraction took 4s.
+==> Using Node.js version 22.14.0 (default)
+==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+==> Using Bun version 1.1.0 (default)
+==> Docs on specifying a bun version: https://render.com/docs/bun-version
+==> Running build command 'npm install; npm run build'...
+up to date, audited 478 packages in 1s
+60 packages are looking for funding
+  run `npm fund` for details
+8 moderate severity vulnerabilities
+To address issues that do not require attention, run:
+  npm audit fix
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+Run `npm audit` for details.
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+vite v5.4.14 building for production...
+transforming...
+Browserslist: browsers data (caniuse-lite) is 6 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 2028 modules transformed.
+rendering chunks...
+computing gzip size...
+../dist/public/index.html                         2.72 kB │ gzip:   1.04 kB
+../dist/public/assets/IMG_2458-Z5mkM-jW.jpeg    208.42 kB
+../dist/public/assets/IMG_2456-DpYw8jqL.png   1,200.97 kB
+../dist/public/assets/index-BrkH-6tK.css         64.05 kB │ gzip:  11.35 kB
+../dist/public/assets/index-C0zHUsIf.js         407.96 kB │ gzip: 123.97 kB
+✓ built in 4.06s
+  dist/index.js  25.7kb
+⚡ Done in 5ms
+==> Uploading build...
+==> Uploaded in 6.3s. Compression took 3.0s
+==> Build successful 🎉
+==> Deploying...
+==> Running 'npm run start'
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+10:00:50 PM [auth] Error creating admin user: TypeError: Invalid URL
+10:00:50 PM [express] serving on port 5000
+==> Your service is live 🎉
+10:01:22 PM [express] GET /api/admin/me 401 in 3ms :: {"error":"Not authenticated"}
+TypeError: Invalid URL
+    at new URL (node:internal/url:818:25)
+    at Object.parse (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:841:225)
+    at parse (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:848:1)
+    at new ConnectionParameters (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:869:23)
+    at new Client (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1226:35)
+    at new NeonClient (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1570:121)
+    at Cn.newClient (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1378:74)
+    at Cn.connect (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1378:23)
+    at Cn.query (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1407:63)
+    at Cn.query (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1623:14)
+10:01:30 PM [express] POST /api/admin/login 500 in 3ms :: {"message":"Invalid URL"}
+10:01:34 PM [express] GET /api/admin/me 401 in 1ms :: {"error":"Not authenticated"}
+10:01:39 PM [express] POST /api/admin/login 500 in 1ms :: {"message":"Invalid URL"}
+TypeError: Invalid URL
+    at new URL (node:internal/url:818:25)
+    at Object.parse (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:841:225)
+    at parse (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:848:1)
+    at new ConnectionParameters (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:869:23)
+    at new Client (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1226:35)
+    at new NeonClient (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1570:121)
+    at Cn.newClient (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1378:74)
+    at Cn.connect (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1378:23)
+    at Cn.query (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1407:63)
+    at Cn.query (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1623:14)
+TypeError: Invalid URL
+    at new URL (node:internal/url:818:25)
+    at Object.parse (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:841:225)
+    at parse (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:848:1)
+    at new ConnectionParameters (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:869:23)
+    at new Client (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1226:35)
+    at new NeonClient (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1570:121)
+    at Cn.newClient (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1378:74)
+10:01:40 PM [express] POST /api/admin/login 500 in 2ms :: {"message":"Invalid URL"}
+    at Cn.connect (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1378:23)
+    at Cn.query (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1407:63)
+    at Cn.query (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1623:14)
+10:02:18 PM [express] POST /api/admin/login 500 in 1ms :: {"message":"Invalid URL"}
+TypeError: Invalid URL
+    at new URL (node:internal/url:818:25)
+    at Object.parse (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:841:225)
+    at parse (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:848:1)
+    at new ConnectionParameters (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:869:23)
+    at new Client (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1226:35)
+    at new NeonClient (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1570:121)
+    at Cn.newClient (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1378:74)
+    at Cn.connect (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1378:23)
+    at Cn.query (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1407:63)
+    at Cn.query (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1623:14)
+10:02:53 PM [express] POST /api/admin/login 500 in 1ms :: {"message":"Invalid URL"}
+TypeError: Invalid URL
+    at new URL (node:internal/url:818:25)
+    at Object.parse (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:841:225)
+    at parse (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:848:1)
+    at new ConnectionParameters (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:869:23)
+    at new Client (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1226:35)
+    at new NeonClient (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1570:121)
+    at Cn.newClient (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1378:74)
+    at Cn.connect (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1378:23)
+    at Cn.query (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1407:63)
+    at Cn.query (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1623:14)
+10:05:34 PM [express] POST /api/admin/login 500 in 2ms :: {"message":"Invalid URL"}
+TypeError: Invalid URL
+    at new URL (node:internal/url:818:25)
+    at Object.parse (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:841:225)
+    at parse (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:848:1)
+    at new ConnectionParameters (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:869:23)
+    at new Client (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1226:35)
+    at new NeonClient (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1570:121)
+    at Cn.newClient (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1378:74)
+    at Cn.connect (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1378:23)
+    at Cn.query (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1407:63)
+    at Cn.query (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1623:14)
+==> Detected service running on port 5000
+==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
