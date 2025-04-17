@@ -8,7 +8,7 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-center md:text-left">
             <p className="text-lg font-poppins font-bold">
-              <span className="text-primary">RE</span>MAK
+              <span className="text-primary">Renn</span>sz
             </p>
             <p className="text-sm text-gray-400">&copy; {new Date().getFullYear()} All Rights Reserved</p>
           </div>
@@ -21,7 +21,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-primary transition-colors"
-                aria-label={`REMAK on ${link.name}`}
+                aria-label={`Rennsz on ${link.name}`}
               >
                 {link.platform === 'twitch' && <FaTwitch className="text-xl" />}
                 {link.platform === 'discord' && <FaDiscord className="text-xl" />}

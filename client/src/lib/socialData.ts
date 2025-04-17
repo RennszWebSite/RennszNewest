@@ -21,37 +21,37 @@ export const socialLinks: SocialLink[] = [
   {
     platform: 'twitch',
     name: 'Twitch',
-    url: 'https://twitch.tv/remak_official',
+    url: 'https://twitch.tv/rennsz',
     icon: 'twitch',
     color: '#9146FF',
-    username: '@remak_official',
+    username: '@rennsz',
     description: 'Live streams & past broadcasts'
   },
   {
     platform: 'discord',
     name: 'Discord',
-    url: 'https://discord.gg/remak',
+    url: 'https://discord.gg/rennsz',
     icon: 'discord',
     color: '#5865F2',
-    username: 'REMAK Community',
+    username: 'Rennsz Community',
     description: 'Join our growing community'
   },
   {
     platform: 'twitter',
     name: 'Twitter',
-    url: 'https://twitter.com/remak_official',
+    url: 'https://twitter.com/rennsz',
     icon: 'twitter',
     color: '#1DA1F2',
-    username: '@remak_official',
+    username: '@rennsz',
     description: 'Updates & announcements'
   },
   {
     platform: 'instagram',
     name: 'Instagram',
-    url: 'https://instagram.com/remak_official',
+    url: 'https://instagram.com/rennsz',
     icon: 'instagram',
     color: '#E1306C',
-    username: '@remak_official',
+    username: '@rennsz',
     description: 'Photos & behind the scenes'
   }
 ];
@@ -62,7 +62,7 @@ export const streamChannels: StreamChannel[] = [
     type: 'primary',
     description: 'Join me as I explore real-world adventures, travel to new destinations, and share unique experiences. From urban exploration to outdoor activities.',
     platform: 'twitch',
-    url: 'https://twitch.tv/remak_official',
+    url: 'https://twitch.tv/rennsz',
     color: '#9146FF'
   },
   {
@@ -70,7 +70,7 @@ export const streamChannels: StreamChannel[] = [
     type: 'secondary',
     description: 'Relaxed gaming sessions featuring a variety of titles from competitive to casual. Come hang out, chat, and enjoy some gameplay in a more laid-back environment.',
     platform: 'twitch',
-    url: 'https://twitch.tv/remak_gaming',
+    url: 'https://twitch.tv/rennszino',
     color: '#9146FF'
   }
 ];

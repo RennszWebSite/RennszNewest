@@ -28,7 +28,7 @@ const Hero = () => {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.3, duration: 0.5 }}
                 >
-                  <span className="text-primary">RE</span>MAK
+                  <span className="text-primary">Renn</span>sz
                 </motion.h1>
                 <motion.p 
                   className="text-lg sm:text-xl md:text-2xl opacity-90 max-w-2xl text-shadow"

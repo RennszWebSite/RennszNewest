@@ -1,6 +1,6 @@
-# Streamer Landing Page
+# Rennsz Streamer Landing Page
 
-A responsive streamer landing page with orange and black theme showcasing all social media links.
+A responsive streamer landing page with orange and black theme showcasing all Rennsz social media links.
 
 ## Features
 
