@@ -1,4 +1,4 @@
-import { FaTwitch, FaDiscord, FaTwitter, FaInstagram } from 'react-icons/fa';
+import { FaTwitch, FaDiscord, FaTwitter, FaInstagram, FaHeart } from 'react-icons/fa';
 import { socialLinks } from '@/lib/socialData';
 
 const Footer = () => {
@@ -30,6 +30,21 @@ const Footer = () => {
               </a>
             ))}
           </div>
+        </div>
+        
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-400 flex items-center justify-center gap-1">
+            Made with <FaHeart className="text-primary animate-pulse" /> by 
+            <a 
+              href="https://discord.com/users/sf.xen" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-primary hover:underline ml-1"
+            >
+              sf.xen
+            </a> 
+            on discord
+          </p>
         </div>
       </div>
     </footer>

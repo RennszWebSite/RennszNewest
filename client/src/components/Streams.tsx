@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { FaTwitch, FaCalendarAlt, FaGamepad, FaUserFriends, FaVideo } from 'react-icons/fa';
+import { FaTwitch, FaCalendarAlt, FaGamepad } from 'react-icons/fa';
 import { streamChannels } from '@/lib/socialData';
 
 const Streams = () => {
@@ -59,32 +59,21 @@ const Streams = () => {
                     <span>Follow on Twitch</span>
                   </a>
                   <a 
-                    href="#schedule" 
+                    href="#connect" 
                     className="flex items-center justify-center gap-2 px-5 py-3 border border-gray-700 rounded-lg font-medium transition-all hover:bg-gray-800"
                   >
                     {channel.type === 'primary' ? (
                       <>
                         <FaCalendarAlt className="text-lg" />
-                        <span>Stream Schedule</span>
+                        <span>Other Channels</span>
                       </>
                     ) : (
                       <>
                         <FaGamepad className="text-lg" />
-                        <span>Game Library</span>
+                        <span>Gaming Content</span>
                       </>
                     )}
                   </a>
-                </div>
-              </div>
-              
-              <div className="px-6 py-4 bg-gray-900 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <FaUserFriends className={`${channel.type === 'primary' ? 'text-primary' : 'text-gray-400'}`} />
-                  <span className="text-sm text-gray-300">{channel.followers} Followers</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <FaVideo className={`${channel.type === 'primary' ? 'text-primary' : 'text-gray-400'}`} />
-                  <span className="text-sm text-gray-300">{channel.frequency}</span>
                 </div>
               </div>
             </motion.div>

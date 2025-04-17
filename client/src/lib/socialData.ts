@@ -13,8 +13,6 @@ export interface StreamChannel {
   type: 'primary' | 'secondary';
   description: string;
   platform: string;
-  followers: string;
-  frequency: string;
   url: string;
   color: string;
 }
@@ -64,8 +62,6 @@ export const streamChannels: StreamChannel[] = [
     type: 'primary',
     description: 'Join me as I explore real-world adventures, travel to new destinations, and share unique experiences. From urban exploration to outdoor activities.',
     platform: 'twitch',
-    followers: '15K+',
-    frequency: 'Streams 3x Weekly',
     url: 'https://twitch.tv/remak_official',
     color: '#9146FF'
   },
@@ -74,8 +70,6 @@ export const streamChannels: StreamChannel[] = [
     type: 'secondary',
     description: 'Relaxed gaming sessions featuring a variety of titles from competitive to casual. Come hang out, chat, and enjoy some gameplay in a more laid-back environment.',
     platform: 'twitch',
-    followers: '8K+',
-    frequency: 'Streams 2x Weekly',
     url: 'https://twitch.tv/remak_gaming',
     color: '#9146FF'
   }
