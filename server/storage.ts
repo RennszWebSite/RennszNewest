@@ -66,10 +66,7 @@ class InMemoryStorage implements IStorage {
   sessionStore: any;
 
   constructor() {
-    this.sessionStore = new PostgresStore({ 
-      pool,
-      createTableIfMissing: true
-    });
+    this.sessionStore = new Map();
   }
 
   // Social Links
