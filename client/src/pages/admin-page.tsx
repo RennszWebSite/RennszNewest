@@ -185,6 +185,13 @@ function AdminDashboard({ onLogout }: AdminDashboardProps) {
           >
             Page Content
           </Button>
+          <Button 
+            variant={activeTab === "profile" ? "default" : "outline"}
+            className={`w-full justify-start ${activeTab === "profile" ? "bg-orange-500 hover:bg-orange-600" : ""}`}
+            onClick={() => setActiveTab("profile")}
+          >
+            Admin Profile
+          </Button>
         </div>
         <div className="flex-1 border rounded-lg p-6">
           {activeTab === "settings" && <SiteSettingsPanel />}
@@ -192,6 +199,7 @@ function AdminDashboard({ onLogout }: AdminDashboardProps) {
           {activeTab === "streams" && <StreamChannelsPanel />}
           {activeTab === "announcements" && <AnnouncementsPanel />}
           {activeTab === "content" && <PageContentPanel />}
+          {activeTab === "profile" && <ProfilePanel />}
         </div>
       </div>
     </div>

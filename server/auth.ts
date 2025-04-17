@@ -104,6 +104,48 @@ export function setupAuth(app: Express) {
     
     res.json({ id: user.id, username: user.username, isAdmin: user.isAdmin });
   });
+  
+  // Change password endpoint
+  app.post("/api/admin/change-password", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    
+    const user = req.user as Express.User;
+    if (!user.isAdmin) {
+      return res.status(403).json({ error: "Not authorized" });
+    }
+    
+    const { currentPassword, newPassword } = req.body;
+    
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: "Current password and new password are required" });
+    }
+    
+    try {
+      // Verify current password
+      const isValidPassword = await comparePasswords(currentPassword, user.password);
+      if (!isValidPassword) {
+        return res.status(400).json({ error: "Current password is incorrect" });
+      }
+      
+      // Hash the new password
+      const hashedPassword = await hashPassword(newPassword);
+      
+      // Update the user password
+      const updatedUser = await storage.updateUserPassword(user.id, hashedPassword);
+      
+      if (!updatedUser) {
+        return res.status(500).json({ error: "Failed to update password" });
+      }
+      
+      // Return success
+      res.json({ success: true, message: "Password updated successfully" });
+    } catch (error) {
+      console.error("Password change error:", error);
+      res.status(500).json({ error: "Failed to update password" });
+    }
+  });
 
   // Create admin user if it doesn't exist
   createAdminUserIfNeeded();
